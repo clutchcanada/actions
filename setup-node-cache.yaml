@@ -1,0 +1,30 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-action.json
+name: setup-node-cache
+description: Setup Node.js and restore cached node_modules
+
+inputs:
+  NPM_TOKEN:
+    required: true
+    description: Auth token for NPM
+
+runs:
+  using: composite
+  steps:
+    - name: Setup node and npm
+      uses: actions/setup-node@v3
+      with:
+        node-version: "18"
+    - name: Cache node modules
+      uses: actions/cache@v3
+      id: cache-node-modules
+      with:
+        path: ./node_modules
+        key: ${{ runner.os }}-build-cache-node-modules-${{ hashFiles('**/package-lock.json') }}
+    - name: Install dependencies on cache miss
+      if: steps.cache-node-modules.outputs.cache-hit != 'true'
+      shell: bash
+      # env:
+      #   NPM_TOKEN: ${{}}
+      run: |
+        npm config set //registry.npmjs.org/:_authToken=${{ inputs.NPM_TOKEN }}
+        npm ci
