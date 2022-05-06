@@ -22,8 +22,8 @@ runs:
     - name: Install dependencies on cache miss
       if: steps.cache-node-modules.outputs.cache-hit != 'true'
       shell: bash
-      # env:
-      #   NPM_TOKEN: ${{}}
+      env:
+        NPM_TOKEN: ${{ inputs.NPM_TOKEN }}
       run: |
-        npm config set //registry.npmjs.org/:_authToken=${{ inputs.NPM_TOKEN }}
+        npm config set //registry.npmjs.org/:_authToken="$NPM_TOKEN"
         npm install --force
