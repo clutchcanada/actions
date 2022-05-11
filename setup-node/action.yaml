@@ -1,4 +1,4 @@
-name: setup-node-cache
+name: setup-node
 description: Setup Node.js and restore cached node_modules
 
 inputs:
@@ -22,8 +22,6 @@ runs:
     - name: Install dependencies on cache miss
       if: steps.cache-node-modules.outputs.cache-hit != 'true'
       shell: bash
-      # env:
-      #   NPM_TOKEN: ${{ inputs.NPM_TOKEN }}
       run: |
         echo ${{ inputs.NPM_TOKEN }}
         npm config set //registry.npmjs.org/:_authToken=${{ inputs.NPM_TOKEN }}
