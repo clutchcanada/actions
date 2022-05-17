@@ -3,8 +3,13 @@ description: Setup Node.js and restore cached node_modules
 
 inputs:
   NPM_TOKEN:
+    description: Auth token for private npm packages
     required: true
-    description: Auth token for NPM
+  NPM_INSTALL_ENV:
+    description: |
+      Environment for running npm install. Pass in any value other than `production`
+      to allow devDependencies to be installed.
+    required: true
 
 runs:
   using: composite
@@ -25,4 +30,4 @@ runs:
       run: |
         echo ${{ inputs.NPM_TOKEN }}
         npm config set //registry.npmjs.org/:_authToken=${{ inputs.NPM_TOKEN }}
-        npm install --force
+        NODE_ENV=${{ inputs.NPM_INSTALL_ENV }} npm install --force
