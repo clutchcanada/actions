@@ -5,29 +5,38 @@ inputs:
   NPM_TOKEN:
     description: Auth token for private npm packages
     required: true
-  NPM_INSTALL_ENV:
-    description: |
-      Environment for running npm install. Pass in any value other than `production`
-      to allow devDependencies to be installed.
-    required: true
 
 runs:
   using: composite
   steps:
-    - name: Setup node and npm
+    - name: Setup node.js
       uses: actions/setup-node@v3
       with:
         node-version: "18"
-    - name: Cache node modules
-      uses: actions/cache@v3
-      id: cache-node-modules
-      with:
-        path: ./node_modules
-        key: ${{ runner.os }}-build-cache-node-modules-${{ hashFiles('**/package-lock.json') }}
-    - name: Install dependencies on cache miss
-      if: steps.cache-node-modules.outputs.cache-hit != 'true'
+
+    - name: Set npm access token
       shell: bash
-      run: |
-        echo ${{ inputs.NPM_TOKEN }}
-        npm config set //registry.npmjs.org/:_authToken=${{ inputs.NPM_TOKEN }}
-        NODE_ENV=${{ inputs.NPM_INSTALL_ENV }} npm install --force
+      run: npm config set //registry.npmjs.org/:_authToken=${{ inputs.NPM_TOKEN }}
+
+    - name: Install pnpm
+      uses: pnpm/action-setup@v2.2.2
+      with:
+        version: latest
+        run_install: false
+
+    - name: Get pnpm store directory
+      id: pnpm-cache
+      shell: bash
+      run: echo "::set-output name=pnpm_cache_dir::$(pnpm store path)"
+
+    - name: Setup pnpm cache
+      uses: actions/cache@v3
+      with:
+        path: ${{ steps.pnpm-cache.outputs.pnpm_cache_dir }}
+        key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/package.json') }}
+        restore-keys: |
+          ${{ runner.os }}-pnpm-store-
+
+    - name: Install dependencies
+      shell: bash
+      run: NODE_ENV=development pnpm install --ignore-scripts
