@@ -30,7 +30,6 @@ runs:
       run: echo "::set-output name=pnpm_cache_dir::$(pnpm store path)"
 
     - name: Setup pnpm cache
-      id: cache_node_modules
       uses: actions/cache@v3
       with:
         path: ${{ steps.directory.outputs.pnpm_cache_dir }}
@@ -39,6 +38,5 @@ runs:
           ${{ runner.os }}-pnpm-store-
 
     - name: Install dependencies
-      if: steps.cache_node_modules.outputs.cache-hit != 'true'
       shell: bash
       run: NODE_ENV=development pnpm install --ignore-scripts
