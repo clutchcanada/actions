@@ -5,6 +5,10 @@ inputs:
   NPM_TOKEN:
     description: Auth token for private npm packages
     required: true
+  SKIP_INSTALL_ON_CACHE_HIT:
+    description: Skip installation of node_modules if the cache was hit
+    required: false
+    default: "false"
 
 runs:
   using: composite
@@ -30,6 +34,7 @@ runs:
       run: echo "::set-output name=pnpm_cache_dir::$(pnpm store path)"
 
     - name: Setup pnpm cache
+      id: pnpm-cache
       uses: actions/cache@v3
       with:
         path: ${{ steps.directory.outputs.pnpm_cache_dir }}
@@ -38,5 +43,6 @@ runs:
           ${{ runner.os }}-pnpm-store-
 
     - name: Install dependencies
+      if: "!(steps.pnpm-cache.outputs.cache-hit == 'true' && inputs.SKIP_INSTALL_ON_CACHE_HIT == 'true')"
       shell: bash
       run: NODE_ENV=development pnpm install --ignore-scripts --prefer-offline
