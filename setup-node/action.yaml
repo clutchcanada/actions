@@ -39,4 +39,4 @@ runs:
 
     - name: Install dependencies
       shell: bash
-      run: NODE_ENV=development pnpm install --ignore-scripts
+      run: NODE_ENV=development pnpm install --ignore-scripts --prefer-offline
